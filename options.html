@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafePost AI - Advanced Settings</title>
+    <link rel="stylesheet" href="options-styles.css" />
+  </head>
+  <body>
+    <div class="options-container">
+      <header class="options-header">
+        <div class="header-content">
+          <div class="logo">
+            <span class="logo-icon">🛡️</span>
+            <h1>SafePost AI</h1>
+            <span class="subtitle">Advanced Settings</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="options-main">
+        <!-- Detection Settings -->
+        <section class="options-section">
+          <h2>🔍 Detection Settings</h2>
+
+          <div class="setting-group">
+            <h3>PII Detection Thresholds</h3>
+            <div class="slider-group">
+              <label for="piiThreshold">Sensitivity Level:</label>
+              <input
+                type="range"
+                id="piiThreshold"
+                min="0"
+                max="100"
+                value="70"
+              />
+              <span class="slider-value">70%</span>
+            </div>
+            <div class="checkbox-grid">
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectEmails" checked />
+                <span class="checkmark"></span>
+                Email Addresses
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectPhones" checked />
+                <span class="checkmark"></span>
+                Phone Numbers
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectAddresses" checked />
+                <span class="checkmark"></span>
+                Physical Addresses
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectSSN" checked />
+                <span class="checkmark"></span>
+                Social Security Numbers
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectCreditCards" checked />
+                <span class="checkmark"></span>
+                Credit Card Numbers
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectIPAddresses" checked />
+                <span class="checkmark"></span>
+                IP Addresses
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Toxicity Detection</h3>
+            <div class="slider-group">
+              <label for="toxicityThreshold">Sensitivity Level:</label>
+              <input
+                type="range"
+                id="toxicityThreshold"
+                min="0"
+                max="100"
+                value="50"
+              />
+              <span class="slider-value">50%</span>
+            </div>
+            <div class="checkbox-grid">
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectHateSpeech" checked />
+                <span class="checkmark"></span>
+                Hate Speech
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectHarassment" checked />
+                <span class="checkmark"></span>
+                Harassment
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectProfanity" checked />
+                <span class="checkmark"></span>
+                Profanity
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectThreat" checked />
+                <span class="checkmark"></span>
+                Threats/Violence
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Policy Violation Detection</h3>
+            <div class="slider-group">
+              <label for="policyThreshold">Sensitivity Level:</label>
+              <input
+                type="range"
+                id="policyThreshold"
+                min="0"
+                max="100"
+                value="60"
+              />
+              <span class="slider-value">60%</span>
+            </div>
+            <div class="checkbox-grid">
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectMisinformation" checked />
+                <span class="checkmark"></span>
+                Misinformation
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectSpam" checked />
+                <span class="checkmark"></span>
+                Spam Content
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectAdultContent" checked />
+                <span class="checkmark"></span>
+                Adult Content
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="detectCopyright" checked />
+                <span class="checkmark"></span>
+                Copyright Violations
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Platform Settings -->
+        <section class="options-section">
+          <h2>🌐 Platform Settings</h2>
+
+          <div class="setting-group">
+            <h3>Supported Platforms</h3>
+            <div class="platform-grid">
+              <div class="platform-card">
+                <div class="platform-header">
+                  <span class="platform-icon">🐦</span>
+                  <span class="platform-name">Twitter/X</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="enableTwitter" checked />
+                    <span class="slider"></span>
+                  </div>
+                </div>
+                <div class="platform-settings">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="twitterReplies" checked />
+                    <span class="checkmark"></span>
+                    Monitor Replies
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="twitterRetweets" checked />
+                    <span class="checkmark"></span>
+                    Monitor Retweets
+                  </label>
+                </div>
+              </div>
+
+              <div class="platform-card">
+                <div class="platform-header">
+                  <span class="platform-icon">📘</span>
+                  <span class="platform-name">Facebook</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="enableFacebook" checked />
+                    <span class="slider"></span>
+                  </div>
+                </div>
+                <div class="platform-settings">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="facebookComments" checked />
+                    <span class="checkmark"></span>
+                    Monitor Comments
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="facebookMessages" checked />
+                    <span class="checkmark"></span>
+                    Monitor Messages
+                  </label>
+                </div>
+              </div>
+
+              <div class="platform-card">
+                <div class="platform-header">
+                  <span class="platform-icon">📷</span>
+                  <span class="platform-name">Instagram</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="enableInstagram" checked />
+                    <span class="slider"></span>
+                  </div>
+                </div>
+                <div class="platform-settings">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="instagramCaptions" checked />
+                    <span class="checkmark"></span>
+                    Monitor Captions
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="instagramStories" checked />
+                    <span class="checkmark"></span>
+                    Monitor Stories
+                  </label>
+                </div>
+              </div>
+
+              <div class="platform-card">
+                <div class="platform-header">
+                  <span class="platform-icon">💼</span>
+                  <span class="platform-name">LinkedIn</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="enableLinkedIn" checked />
+                    <span class="slider"></span>
+                  </div>
+                </div>
+                <div class="platform-settings">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="linkedinPosts" checked />
+                    <span class="checkmark"></span>
+                    Monitor Posts
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="linkedinMessages" checked />
+                    <span class="checkmark"></span>
+                    Monitor Messages
+                  </label>
+                </div>
+              </div>
+
+              <div class="platform-card">
+                <div class="platform-header">
+                  <span class="platform-icon">🤖</span>
+                  <span class="platform-name">Reddit</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="enableReddit" checked />
+                    <span class="slider"></span>
+                  </div>
+                </div>
+                <div class="platform-settings">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="redditPosts" checked />
+                    <span class="checkmark"></span>
+                    Monitor Posts
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="redditComments" checked />
+                    <span class="checkmark"></span>
+                    Monitor Comments
+                  </label>
+                </div>
+              </div>
+
+              <div class="platform-card">
+                <div class="platform-header">
+                  <span class="platform-icon">🎵</span>
+                  <span class="platform-name">TikTok</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="enableTikTok" checked />
+                    <span class="slider"></span>
+                  </div>
+                </div>
+                <div class="platform-settings">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="tiktokCaptions" checked />
+                    <span class="checkmark"></span>
+                    Monitor Captions
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="tiktokComments" checked />
+                    <span class="checkmark"></span>
+                    Monitor Comments
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Behavior Settings -->
+        <section class="options-section">
+          <h2>⚙️ Behavior Settings</h2>
+
+          <div class="setting-group">
+            <h3>Warning Display</h3>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="warningStyle" value="modal" checked />
+                <span class="radio-mark"></span>
+                Modal Dialog (Recommended)
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="warningStyle" value="toast" />
+                <span class="radio-mark"></span>
+                Toast Notification
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="warningStyle" value="inline" />
+                <span class="radio-mark"></span>
+                Inline Highlights Only
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Auto-Actions</h3>
+            <div class="checkbox-grid">
+              <label class="checkbox-label">
+                <input type="checkbox" id="autoBlock" />
+                <span class="checkmark"></span>
+                Auto-block high-risk posts
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="autoSave" />
+                <span class="checkmark"></span>
+                Auto-save flagged drafts
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="autoSuggest" checked />
+                <span class="checkmark"></span>
+                Auto-suggest alternatives
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="enableSounds" />
+                <span class="checkmark"></span>
+                Enable warning sounds
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Performance</h3>
+            <div class="slider-group">
+              <label for="analysisDelay">Analysis Delay (ms):</label>
+              <input
+                type="range"
+                id="analysisDelay"
+                min="500"
+                max="5000"
+                value="1000"
+                step="250"
+              />
+              <span class="slider-value">1000ms</span>
+            </div>
+            <div class="slider-group">
+              <label for="cacheSize">Cache Size (items):</label>
+              <input
+                type="range"
+                id="cacheSize"
+                min="10"
+                max="500"
+                value="100"
+                step="10"
+              />
+              <span class="slider-value">100</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data & Privacy -->
+        <section class="options-section">
+          <h2>🔒 Data & Privacy</h2>
+
+          <div class="setting-group">
+            <h3>Data Storage</h3>
+            <div class="checkbox-grid">
+              <label class="checkbox-label">
+                <input type="checkbox" id="storeAnalyzedText" />
+                <span class="checkmark"></span>
+                Store analyzed text for improvement
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="anonymizeData" checked />
+                <span class="checkmark"></span>
+                Anonymize stored data
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="allowTelemetry" />
+                <span class="checkmark"></span>
+                Allow anonymous usage telemetry
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Data Management</h3>
+            <div class="data-actions">
+              <button id="exportAllData" class="btn btn-secondary">
+                📁 Export All Data
+              </button>
+              <button id="clearAllData" class="btn btn-danger">
+                🗑️ Clear All Data
+              </button>
+              <button id="resetSettings" class="btn btn-warning">
+                🔄 Reset to Defaults
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Advanced Features -->
+        <section class="options-section">
+          <h2>🚀 Advanced Features</h2>
+
+          <div class="setting-group">
+            <h3>Custom Models</h3>
+            <div class="model-config">
+              <label for="customNERModel">Custom NER Model:</label>
+              <input
+                type="text"
+                id="customNERModel"
+                placeholder="huggingface/model-name"
+              />
+
+              <label for="customToxicityModel">Custom Toxicity Model:</label>
+              <input
+                type="text"
+                id="customToxicityModel"
+                placeholder="huggingface/model-name"
+              />
+
+              <label for="customPolicyModel">Custom Policy Model:</label>
+              <input
+                type="text"
+                id="customPolicyModel"
+                placeholder="huggingface/model-name"
+              />
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>Whitelist/Blacklist</h3>
+            <div class="list-config">
+              <div class="list-section">
+                <label for="whitelistWords">Whitelist (comma-separated):</label>
+                <textarea
+                  id="whitelistWords"
+                  placeholder="words, phrases, that should never be flagged"
+                ></textarea>
+              </div>
+              <div class="list-section">
+                <label for="blacklistWords">Blacklist (comma-separated):</label>
+                <textarea
+                  id="blacklistWords"
+                  placeholder="words, phrases, that should always be flagged"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="options-footer">
+        <div class="footer-actions">
+          <button id="saveSettings" class="btn btn-primary">
+            💾 Save Settings
+          </button>
+          <button id="testSettings" class="btn btn-secondary">
+            🧪 Test Settings
+          </button>
+        </div>
+        <div class="footer-info">
+          <span class="version">Version 1.0.0</span>
+          <a href="#" id="viewLogs">View Logs</a>
+          <a href="#" id="reportIssue">Report Issue</a>
+        </div>
+      </footer>
+    </div>
+
+    <script src="api/huggingface-service.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>

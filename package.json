@@ -1,0 +1,27 @@
+{
+  "name": "safepost-ai",
+  "version": "1.0.0",
+  "description": "AI-powered social media post analyzer for Chrome",
+  "scripts": {
+    "build": "echo 'No build process needed for pure JS extension'",
+    "test": "echo 'Tests would go here'",
+    "lint": "echo 'Linting would go here'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "nlp",
+    "social-media",
+    "privacy",
+    "content-moderation"
+  ],
+  "author": "SafePost AI Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/safepost-ai.git"
+  },
+  "devDependencies": {
+    "web-ext": "^7.8.0"
+  }
+}

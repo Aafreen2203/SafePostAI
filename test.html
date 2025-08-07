@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafePost AI - Test Page</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.2em;
+      }
+
+      .section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #3498db;
+      }
+
+      .section h3 {
+        color: #2c3e50;
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      textarea,
+      input[type="text"],
+      input[type="email"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 15px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+
+      textarea:focus,
+      input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+
+      .example-text {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+        padding: 8px;
+        background: #fff;
+        border-radius: 5px;
+        border-left: 3px solid #f39c12;
+      }
+
+      button {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: #2980b9;
+      }
+
+      .debug-section {
+        background: #2c3e50;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 30px;
+      }
+
+      .debug-section h3 {
+        color: #ecf0f1;
+        margin-top: 0;
+      }
+
+      .debug-button {
+        background: #27ae60;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .debug-button:hover {
+        background: #229954;
+      }
+
+      .status {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .image-upload {
+        border: 2px dashed #ddd;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px;
+        transition: border-color 0.3s;
+      }
+
+      .image-upload:hover {
+        border-color: #3498db;
+      }
+
+      .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        margin-top: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🛡️ SafePost AI Test Page</h1>
+
+      <div class="section">
+        <h3>📝 Text Analysis Test</h3>
+        <div class="example-text">
+          <strong>Try typing sensitive information:</strong><br />
+          • Email: john.doe@example.com<br />
+          • Phone: +91-9876543210 or (555) 123-4567<br />
+          • Address: 123 Main Street, Mumbai 400001<br />
+          • Aadhaar: 1234 5678 9012<br />
+          • PAN: ABCDE1234F
+        </div>
+
+        <textarea
+          id="testInput"
+          placeholder="Type some text with sensitive information..."
+          rows="4"
+        ></textarea>
+
+        <input type="text" id="emailInput" placeholder="Enter email address" />
+
+        <input type="text" id="phoneInput" placeholder="Enter phone number" />
+
+        <div
+          contenteditable="true"
+          id="editableDiv"
+          style="
+            border: 2px solid #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 60px;
+            background: white;
+            margin-bottom: 15px;
+          "
+          placeholder="This is a contenteditable div - try typing here..."
+        >
+          Click here and type sensitive information
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>🖼️ Image Analysis Test</h3>
+        <div class="example-text">
+          <strong>Upload an image containing text:</strong><br />
+          • Screenshot of a document with personal info<br />
+          • Business card with contact details<br />
+          • Form with address/phone numbers<br />
+          • Any image with readable text
+        </div>
+
+        <div class="image-upload">
+          <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+            style="display: none"
+          />
+          <button onclick="document.getElementById('imageInput').click()">
+            📁 Upload Image
+          </button>
+          <p>Or drag and drop an image here</p>
+          <div id="imagePreview"></div>
+        </div>
+      </div>
+
+      <div class="debug-section">
+        <h3>🔧 Debug & Testing</h3>
+        <div id="status" class="status"></div>
+
+        <button class="debug-button" onclick="testExtensionLoaded()">
+          Test Extension Loading
+        </button>
+        <button class="debug-button" onclick="fillSampleData()">
+          Fill Sample Data
+        </button>
+        <button class="debug-button" onclick="checkConsole()">
+          Check Console
+        </button>
+        <button class="debug-button" onclick="testImageUpload()">
+          Test Image Upload
+        </button>
+
+        <div style="margin-top: 15px">
+          <strong>Expected Behavior:</strong>
+          <ul style="margin: 10px 0; padding-left: 20px">
+            <li>
+              Extension should show green "SafePost AI Active" notification on
+              page load
+            </li>
+            <li>
+              Typing sensitive info should trigger colored warning overlays
+            </li>
+            <li>
+              Uploading images with text should show "Analyzing Image" indicator
+            </li>
+            <li>Check browser console for detailed logs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Test functions
+      function testExtensionLoaded() {
+        const status = document.getElementById("status");
+
+        if (typeof chrome !== "undefined" && chrome.runtime) {
+          try {
+            chrome.runtime.sendMessage({ ping: true }, (response) => {
+              if (chrome.runtime.lastError) {
+                showStatus(
+                  "Extension not responding: " +
+                    chrome.runtime.lastError.message,
+                  "error"
+                );
+              } else if (response) {
+                showStatus("✅ Extension loaded: " + response, "success");
+              } else {
+                showStatus("Extension loaded but no response", "error");
+              }
+            });
+          } catch (error) {
+            showStatus("Error testing extension: " + error.message, "error");
+          }
+        } else {
+          showStatus("❌ Chrome extension APIs not available", "error");
+        }
+      }
+
+      function fillSampleData() {
+        document.getElementById("testInput").value =
+          "Contact John Doe at john.doe@example.com or call +91-9876543210. His address is 123 Main Street, Mumbai 400001. Aadhaar: 1234 5678 9012";
+        document.getElementById("emailInput").value = "sensitive@example.com";
+        document.getElementById("phoneInput").value = "+91-9876543210";
+        document.getElementById("editableDiv").textContent =
+          "PAN: ABCDE1234F, Phone: (555) 123-4567";
+
+        // Trigger input events
+        ["testInput", "emailInput", "phoneInput"].forEach((id) => {
+          const element = document.getElementById(id);
+          element.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+
+        const editableDiv = document.getElementById("editableDiv");
+        editableDiv.dispatchEvent(new Event("input", { bubbles: true }));
+
+        showStatus(
+          "✅ Sample data filled - warnings should appear!",
+          "success"
+        );
+      }
+
+      function checkConsole() {
+        console.log("🔍 Manual console check - look for SafePost AI messages");
+        console.log("Window objects:", {
+          safepostDetector: typeof window.safepostDetector,
+          chrome: typeof chrome,
+          Tesseract: typeof window.Tesseract,
+        });
+        showStatus("Check browser console for detailed logs", "success");
+      }
+
+      function testImageUpload() {
+        // Create a canvas with sample text
+        const canvas = document.createElement("canvas");
+        canvas.width = 400;
+        canvas.height = 200;
+        const ctx = canvas.getContext("2d");
+
+        // White background
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 400, 200);
+
+        // Add sample text
+        ctx.fillStyle = "black";
+        ctx.font = "16px Arial";
+        ctx.fillText("Sample Document", 20, 30);
+        ctx.fillText("Email: test@example.com", 20, 60);
+        ctx.fillText("Phone: +91-9876543210", 20, 90);
+        ctx.fillText("Address: 123 Main St, Mumbai 400001", 20, 120);
+
+        // Convert to blob and display
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const img = document.createElement("img");
+          img.src = url;
+          img.className = "image-preview";
+          img.onload = () => {
+            const preview = document.getElementById("imagePreview");
+            preview.innerHTML = "";
+            preview.appendChild(img);
+            showStatus(
+              "✅ Test image created - should be analyzed automatically",
+              "success"
+            );
+          };
+        });
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById("status");
+        status.textContent = message;
+        status.className = "status " + type;
+      }
+
+      // Image upload handler
+      document
+        .getElementById("imageInput")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file && file.type.startsWith("image/")) {
+            const img = document.createElement("img");
+            img.className = "image-preview";
+            img.src = URL.createObjectURL(file);
+
+            const preview = document.getElementById("imagePreview");
+            preview.innerHTML = "";
+            preview.appendChild(img);
+
+            showStatus(
+              "Image uploaded - analysis should start automatically",
+              "success"
+            );
+          }
+        });
+
+      // Drag and drop for images
+      const uploadArea = document.querySelector(".image-upload");
+
+      uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = "#3498db";
+        uploadArea.style.backgroundColor = "rgba(52, 152, 219, 0.1)";
+      });
+
+      uploadArea.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = "#ddd";
+        uploadArea.style.backgroundColor = "transparent";
+      });
+
+      uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = "#ddd";
+        uploadArea.style.backgroundColor = "transparent";
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith("image/")) {
+          const img = document.createElement("img");
+          img.className = "image-preview";
+          img.src = URL.createObjectURL(files[0]);
+
+          const preview = document.getElementById("imagePreview");
+          preview.innerHTML = "";
+          preview.appendChild(img);
+
+          showStatus(
+            "Image dropped - analysis should start automatically",
+            "success"
+          );
+        }
+      });
+
+      // Auto-test on load
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          showStatus("Page loaded - testing extension...", "success");
+          setTimeout(testExtensionLoaded, 1000);
+        }, 500);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafePost AI</title>
+    <link rel="stylesheet" href="popup-styles.css" />
+  </head>
+  <body>
+    <div class="popup-container">
+      <!-- Header -->
+      <div class="popup-header">
+        <div class="logo">
+          <span class="logo-icon">🛡️</span>
+          <h1>SafePost AI</h1>
+        </div>
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">Loading...</span>
+        </div>
+      </div>
+
+      <!-- API Key Setup -->
+      <div class="section" id="apiKeySection">
+        <h3>🔑 HuggingFace API Configuration</h3>
+        <div class="input-group">
+          <label for="apiKeyInput">API Key:</label>
+          <div class="input-with-button">
+            <input
+              type="password"
+              id="apiKeyInput"
+              placeholder="Enter your HuggingFace API key"
+            />
+            <button
+              id="toggleApiKey"
+              class="toggle-btn"
+              title="Show/Hide API Key"
+            >
+              👁️
+            </button>
+          </div>
+          <small class="help-text">
+            Get your free API key from
+            <a href="https://huggingface.co/settings/tokens" target="_blank"
+              >HuggingFace</a
+            >
+          </small>
+        </div>
+        <button id="saveApiKey" class="btn btn-primary">Save API Key</button>
+      </div>
+
+      <!-- Settings -->
+      <div class="section" id="settingsSection">
+        <h3>⚙️ Settings</h3>
+
+        <div class="setting-item">
+          <div class="setting-header">
+            <label for="enabledToggle">Enable SafePost AI</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="enabledToggle" />
+              <span class="slider"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <label for="sensitivitySelect">Detection Sensitivity:</label>
+          <select id="sensitivitySelect">
+            <option value="low">Low - Basic PII only</option>
+            <option value="medium" selected>Medium - Balanced detection</option>
+            <option value="high">High - Strict analysis</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>Detection Types:</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="detectPII" checked />
+              <span class="checkmark"></span>
+              Personal Information (PII)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="detectToxicity" checked />
+              <span class="checkmark"></span>
+              Toxic Content
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="detectPolicy" checked />
+              <span class="checkmark"></span>
+              Policy Violations
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="detectEntities" checked />
+              <span class="checkmark"></span>
+              Named Entities
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics -->
+      <div class="section" id="analyticsSection">
+        <h3>📊 Analytics</h3>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <div class="analytics-number" id="totalScans">0</div>
+            <div class="analytics-label">Total Scans</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-number" id="riskyPosts">0</div>
+            <div class="analytics-label">Risky Posts</div>
+          </div>
+          <div class="analytics-card">
+            <div class="analytics-number" id="overrides">0</div>
+            <div class="analytics-label">User Overrides</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Logs -->
+      <div class="section" id="logsSection">
+        <div class="section-header">
+          <h3>📋 Recent Activity</h3>
+          <button id="clearLogs" class="btn btn-secondary btn-small">
+            Clear All
+          </button>
+        </div>
+        <div id="logsList" class="logs-list">
+          <!-- Logs will be populated here -->
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="popup-footer">
+        <button id="openOptions" class="btn btn-link">Advanced Settings</button>
+        <button id="exportLogs" class="btn btn-link">Export Logs</button>
+      </div>
+    </div>
+
+    <script src="api/huggingface-service.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
