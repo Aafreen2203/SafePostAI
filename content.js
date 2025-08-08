@@ -25,13 +25,15 @@ const WARNING_STYLES = `
   }
   
   .safepost-modal {
-    background: white;
-    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+    border-radius: 18px;
     max-width: 600px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(44, 62, 80, 0.18), 0 2px 8px rgba(44, 62, 80, 0.10);
     animation: safepostSlideIn 0.3s ease-out;
+    padding: 0 0 12px 0;
+    border: 1.5px solid #dbeafe;
   }
   
   @keyframes safepostSlideIn {
@@ -40,13 +42,28 @@ const WARNING_STYLES = `
   }
   
   .safepost-modal-header {
-    padding: 24px 24px 16px;
-    border-bottom: 2px solid #f1f1f1;
+    padding: 28px 36px 12px 36px;
+    border-bottom: 2px solid #e0e7ef;
+    background: linear-gradient(90deg, #e0e7ef 0%, #f8fafc 100%);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
   }
   
   .safepost-modal-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #22223b;
+    margin-bottom: 0.5em;
+    text-align: left;
+    padding-left: 2px;
+  }
   .safepost-modal-content {
-    padding: 20px 24px;
+    padding: 28px 36px 12px 36px;
+    color: #22223b;
+    font-size: 1.08rem;
+    line-height: 1.7;
+    text-align: left;
   }
   
   .safepost-risk-critical { color: #e74c3c; }
@@ -61,11 +78,14 @@ const WARNING_STYLES = `
        },
   
   .safepost-detected-item {
-    background: #f8f9fa;
+    background: #f1f5f9;
     border-left: 4px solid #e74c3c;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 4px;
+    padding: 14px 18px 14px 18px;
+    margin: 12px 0 12px 0;
+    border-radius: 7px;
+    font-size: 1.01rem;
+    color: #22223b;
+    box-shadow: 0 1px 4px rgba(44, 62, 80, 0.06);
   }
   
   .safepost-detected-item.high { border-left-color: #f39c12; }
@@ -73,19 +93,22 @@ const WARNING_STYLES = `
   .safepost-detected-item.low { border-left-color: #95a5a6; }
   
   .safepost-modal-actions {
-    padding: 16px 24px 24px;
+    padding: 18px 36px 24px 36px;
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: flex-end;
+    background: transparent;
   }
   
   .safepost-btn {
-    padding: 10px 20px;
+    padding: 12px 28px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 1.05rem;
     transition: all 0.2s;
+    box-shadow: 0 1px 4px rgba(44, 62, 80, 0.08);
   }
   
   .safepost-btn-danger {
