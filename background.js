@@ -1,4 +1,4 @@
-// SafePost AI Background Service Worker
+// SafePost AI Background Service
 class SafePostBackground {
   constructor() {
     this.init();
