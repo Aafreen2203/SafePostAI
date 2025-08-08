@@ -18,6 +18,15 @@ SafePost AI is a browser extension designed to analyze images and text on social
 4. **Privacy Notice**: A modal popup informs users that all processing is local and no data is sent to any server.
 5. **User Action**: Users are notified of any detected risks and can choose to proceed or edit their content.
 
+## Demo
+
+Below is an example of the SafePost AI privacy risk detection modal in action:
+
+![Privacy Risk Detection Screenshot](./path/to/your/image.png)
+
+*This screenshot shows SafePost AI detecting multiple sensitive items with a medium risk level and providing users with actionable options.*
+
+
 ## Privacy Preservation
 
 - **No Data Upload**: All image and text analysis is performed in the browser. No images, text, or metadata are sent to any external server at any point.
