@@ -20,6 +20,12 @@ class SafePostOptions {
         toxicityThreshold: result.toxicityThreshold || 50,
         policyThreshold: result.policyThreshold || 60,
 
+        // AI Settings
+        openaiApiKey: result.openaiApiKey || "",
+        huggingfaceApiKey: result.huggingfaceApiKey || "",
+        useAIAnalysis: result.useAIAnalysis !== false,
+        fallbackToRegex: result.fallbackToRegex !== false,
+
         // PII detection types
         detectEmails: result.detectEmails !== false,
         detectPhones: result.detectPhones !== false,
@@ -137,6 +143,8 @@ class SafePostOptions {
       "storeAnalyzedText",
       "anonymizeData",
       "allowTelemetry",
+      "useAIAnalysis",
+      "fallbackToRegex",
     ];
 
     checkboxes.forEach((id) => {
@@ -146,6 +154,26 @@ class SafePostOptions {
           this.settings[id] = e.target.checked;
         });
       }
+    });
+
+    // API Key inputs
+    const apiKeyInputs = ["openaiApiKey", "huggingfaceApiKey"];
+    apiKeyInputs.forEach((id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener("input", (e) => {
+          this.settings[id] = e.target.value;
+        });
+      }
+    });
+
+    // API Key toggle buttons
+    document.getElementById("toggleApiKey")?.addEventListener("click", () => {
+      this.togglePasswordVisibility("openaiApiKey");
+    });
+
+    document.getElementById("toggleHfApiKey")?.addEventListener("click", () => {
+      this.togglePasswordVisibility("huggingfaceApiKey");
     });
 
     // Radio buttons
@@ -252,6 +280,11 @@ class SafePostOptions {
       const element = document.getElementById(key);
       if (element && element.type === "checkbox") {
         element.checked = value;
+      } else if (
+        element &&
+        (element.type === "password" || element.type === "text")
+      ) {
+        element.value = value || "";
       }
     }
 
@@ -464,6 +497,24 @@ class SafePostOptions {
       whitelistWords: "",
       blacklistWords: "",
     };
+  }
+
+  togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    const toggleBtn =
+      inputId === "openaiApiKey"
+        ? document.getElementById("toggleApiKey")
+        : document.getElementById("toggleHfApiKey");
+
+    if (input && toggleBtn) {
+      if (input.type === "password") {
+        input.type = "text";
+        toggleBtn.textContent = "🙈";
+      } else {
+        input.type = "password";
+        toggleBtn.textContent = "👁️";
+      }
+    }
   }
 
   async notifyContentScripts() {

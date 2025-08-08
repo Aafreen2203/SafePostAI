@@ -217,3 +217,126 @@ if (typeof module !== "undefined" && module.exports) {
 } else {
   window.HuggingFaceService = HuggingFaceService;
 }
+
+const SYSTEM_PROMPT = `You are an AI-powered sensitive data leak prevention system embedded in a browser extension. 
+Your goal is to analyze user-provided content and detect any text that may contain sensitive or personally identifiable information (PII) or confidential data. 
+
+Sensitive information includes but is not limited to:
+- Personal details: full names, phone numbers, email addresses, postal addresses, date of birth
+- Government IDs: passport numbers, Aadhaar numbers, Social Security numbers
+- Financial info: credit/debit card numbers, bank account details, IBAN, CVV
+- Authentication data: usernames, passwords, API keys, tokens, security answers
+- Health-related data: medical reports, prescriptions, health IDs
+- Company confidential info: internal project names, unreleased product details, internal documents
+
+**Instructions:**
+1. Scan the provided text and identify all possible sensitive data instances.
+2. For each detected instance:
+   - Classify it into one of the categories above.
+   - Provide a short reason why it may be sensitive.
+   - Suggest a safe alternative or masking approach (e.g., replace digits with "X", blur in images).
+3. If no sensitive data is found, return: "No sensitive content detected."
+
+**Output format (JSON)**:
+{
+  "detected": true/false,
+  "items": [
+    {
+      "text": "string (exact match)",
+      "category": "string",
+      "reason": "string",
+      "suggestion": "string"
+    }
+  ]
+}
+
+Analyze this content:
+"{USER_INPUT_TEXT}"`;
+
+async function analyzeWithHuggingFace(text) {
+  try {
+    console.log("🔍 Analyzing text with Hugging Face...");
+
+    const settings = await getStoredSettings();
+    if (!settings.huggingfaceToken) {
+      throw new Error("Hugging Face API token not configured");
+    }
+
+    // Replace the placeholder with actual user input
+    const prompt = SYSTEM_PROMPT.replace("{USER_INPUT_TEXT}", text);
+
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${settings.huggingfaceToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_new_tokens: 500,
+            temperature: 0.1,
+            return_full_text: false,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Hugging Face API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ Hugging Face response received");
+
+    // Try to parse JSON response
+    let result;
+    try {
+      const responseText = data[0]?.generated_text || data.generated_text || "";
+
+      // Try to extract JSON from the response
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        result = JSON.parse(jsonMatch[0]);
+      } else if (responseText.includes("No sensitive content detected")) {
+        result = {
+          detected: false,
+          items: [],
+        };
+      } else {
+        // Fallback: treat as detection with general warning
+        result = {
+          detected: true,
+          items: [
+            {
+              text: text.substring(0, 50) + "...",
+              category: "Unknown",
+              reason: "Potential sensitive content detected",
+              suggestion: "Review content before posting",
+            },
+          ],
+        };
+      }
+    } catch (parseError) {
+      console.warn("⚠️ Could not parse JSON response, using fallback");
+      result = {
+        detected: true,
+        items: [
+          {
+            text: text.substring(0, 50) + "...",
+            category: "Unknown",
+            reason: "Could not analyze content properly",
+            suggestion: "Review content manually before posting",
+          },
+        ],
+      };
+    }
+
+    return result;
+  } catch (error) {
+    console.error("❌ Hugging Face analysis failed:", error);
+    throw error;
+  }
+}

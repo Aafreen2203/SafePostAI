@@ -1,6 +1,64 @@
 // SafePost AI - Fixed Content Script for Sensitive Data Detection
 console.log("🛡️ SafePost AI v1.2: Starting Enhanced Detection...");
 
+function displayWarnings(analysis) {
+  if (
+    !analysis ||
+    !analysis.detected ||
+    !analysis.items ||
+    analysis.items.length === 0
+  ) {
+    console.log("✅ No sensitive content detected");
+    return;
+  }
+
+  // Remove any existing warnings
+  removeExistingWarnings();
+
+  // Create warning container
+  const warningContainer = document.createElement("div");
+  warningContainer.className = "safepost-warning-container";
+  warningContainer.innerHTML = `
+        <div class="safepost-warning-header">
+            <span class="safepost-warning-icon">⚠️</span>
+            <span class="safepost-warning-title">Sensitive Content Detected</span>
+            <button class="safepost-dismiss-btn" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+        <div class="safepost-warning-content">
+            <p class="safepost-warning-subtitle">The following sensitive information was detected:</p>
+            <div class="safepost-warning-items">
+                ${analysis.items
+                  .map(
+                    (item) => `
+                    <div class="safepost-warning-item">
+                        <div class="safepost-item-category">${item.category}</div>
+                        <div class="safepost-item-text">"${item.text}"</div>
+                        <div class="safepost-item-reason">${item.reason}</div>
+                        <div class="safepost-item-suggestion"><strong>Suggestion:</strong> ${item.suggestion}</div>
+                    </div>
+                `
+                  )
+                  .join("")}
+            </div>
+            <div class="safepost-warning-actions">
+                <button class="safepost-btn safepost-btn-primary" onclick="this.closest('.safepost-warning-container').remove()">
+                    I'll review and edit
+                </button>
+                <button class="safepost-btn safepost-btn-secondary" onclick="this.closest('.safepost-warning-container').remove()">
+                    Post anyway
+                </button>
+            </div>
+        </div>
+    `;
+
+  // Insert warning before the post area
+  const postArea = findPostTextarea();
+  if (postArea) {
+    postArea.parentNode.insertBefore(warningContainer, postArea);
+    postArea.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
 // Add ping response for debugging
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.ping) {
@@ -20,6 +78,9 @@ class SensitiveContentDetector {
   async init() {
     console.log("🛡️ SafePost AI: Initializing Enhanced Detector...");
 
+    // Initialize AI Privacy Analyzer
+    await this.initializeAIAnalyzer();
+
     // Start immediately with regex patterns (no API dependency)
     this.startMonitoring();
 
@@ -27,6 +88,60 @@ class SensitiveContentDetector {
     this.loadTesseract();
 
     console.log("✅ SafePost AI: Ready for text and image analysis!");
+  }
+
+  async initializeAIAnalyzer() {
+    try {
+      // Get API keys from storage
+      const result = await chrome.storage.local.get([
+        "openaiApiKey",
+        "huggingfaceApiKey",
+        "preferredAI",
+      ]);
+
+      // Initialize AI Privacy Analyzer
+      if (!window.AIPrivacyAnalyzer) {
+        await this.loadAIAnalyzer();
+      }
+
+      this.aiAnalyzer = new window.AIPrivacyAnalyzer({
+        openaiApiKey: result.openaiApiKey,
+        huggingfaceApiKey: result.huggingfaceApiKey,
+        preferredProvider: result.preferredAI || "openai",
+      });
+
+      if (result.openaiApiKey || result.huggingfaceApiKey) {
+        console.log("🤖 SafePost AI: AI-powered analysis enabled");
+      } else {
+        console.log(
+          "📝 SafePost AI: Using regex-based analysis (add API keys for AI enhancement)"
+        );
+      }
+    } catch (error) {
+      console.error("❌ SafePost AI: Error initializing AI analyzer:", error);
+      this.aiAnalyzer = null;
+    }
+  }
+
+  async loadAIAnalyzer() {
+    return new Promise((resolve, reject) => {
+      if (window.AIPrivacyAnalyzer) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = chrome.runtime.getURL("api/ai-privacy-analyzer.js");
+      script.onload = () => {
+        console.log("✅ SafePost AI: AI Privacy Analyzer loaded");
+        resolve();
+      };
+      script.onerror = () => {
+        console.error("❌ SafePost AI: Failed to load AI Privacy Analyzer");
+        reject(new Error("Failed to load AI Privacy Analyzer"));
+      };
+      document.head.appendChild(script);
+    });
   }
 
   // Enhanced sensitive data patterns
@@ -114,6 +229,9 @@ class SensitiveContentDetector {
 
     // Monitor images
     this.monitorImages();
+
+    // Monitor file inputs for image uploads
+    this.monitorFileInputs();
 
     // Set up mutation observer for dynamic content
     this.observePageChanges();
@@ -229,7 +347,7 @@ class SensitiveContentDetector {
     return element.value || element.textContent || element.innerText || "";
   }
 
-  analyzeTextInput(element) {
+  async analyzeTextInput(element) {
     const text = this.getElementText(element);
 
     if (text.length < 5) {
@@ -244,23 +362,48 @@ class SensitiveContentDetector {
       );
     }
 
-    const patterns = this.getSensitivePatterns();
-    const detections = [];
+    let detections = [];
 
-    // Check each pattern
-    Object.entries(patterns).forEach(([type, config]) => {
-      const matches = [...text.matchAll(config.regex)];
-      matches.forEach((match) => {
-        detections.push({
-          type: type,
-          label: config.label,
-          text: match[0],
-          risk: config.risk,
-          start: match.index,
-          end: match.index + match[0].length,
+    // Use AI-powered analysis if available
+    if (this.aiAnalyzer) {
+      try {
+        const aiDetections = await this.aiAnalyzer.analyzePrivacy(text);
+        if (aiDetections && aiDetections.length > 0) {
+          detections = aiDetections.map((detection) => ({
+            type: detection.type || "pii",
+            label: detection.label || "Privacy Risk",
+            text: detection.text,
+            risk: detection.risk || "medium",
+            start: detection.start || 0,
+            end: detection.end || detection.text.length,
+            source: "ai",
+          }));
+        }
+      } catch (error) {
+        console.warn("AI analysis failed, falling back to regex:", error);
+      }
+    }
+
+    // If no AI detections or AI unavailable, use regex patterns
+    if (detections.length === 0) {
+      const patterns = this.getSensitivePatterns();
+
+      // Check each pattern
+      Object.entries(patterns).forEach(([type, config]) => {
+        const matches = [...text.matchAll(config.regex)];
+        matches.forEach((match) => {
+          detections.push({
+            type: type,
+            label: config.label,
+            text: match[0],
+            risk: config.risk,
+            start: match.index,
+            end: match.index + match[0].length,
+            source: "regex",
+          });
         });
       });
-    });
+    }
 
     if (detections.length > 0) {
       console.log("🚨 SENSITIVE DATA DETECTED:", detections);
@@ -416,20 +559,163 @@ class SensitiveContentDetector {
   shouldAnalyzeImage(img) {
     // Check if image is likely user content
     const src = img.src || "";
+
+    // Enhanced detection for user-uploaded content
     const isUserContent =
+      // Data URLs and blob URLs (direct uploads)
       src.includes("blob:") ||
       src.includes("data:") ||
+      // Platform-specific selectors
       img.closest('[data-testid*="upload"]') ||
       img.closest('[data-testid*="creation"]') ||
+      img.closest('[data-testid*="composer"]') ||
+      img.closest('[data-testid*="photo"]') ||
+      img.closest('[data-testid*="image"]') ||
+      img.closest('[data-testid*="media"]') ||
       img.closest(".media-preview") ||
-      img.closest('[aria-label*="photo"]');
+      img.closest('[aria-label*="photo"]') ||
+      img.closest('[aria-label*="image"]') ||
+      img.closest('[aria-label*="upload"]') ||
+      // File input related
+      img.closest('input[type="file"]') ||
+      img.closest(".file-upload") ||
+      img.closest(".image-upload") ||
+      // Social media specific
+      img.closest('[data-pagelet*="composer"]') ||
+      img.closest('[role="dialog"]') ||
+      img.closest(".composer") ||
+      // Instagram specific
+      img.closest('[data-testid="new-post-photo"]') ||
+      img.closest('[data-testid="creation-photo"]') ||
+      // Twitter specific
+      img.closest('[data-testid="tweet-composer"]') ||
+      img.closest('[data-testid="media-upload"]') ||
+      // Generic upload areas
+      img.closest('[class*="upload"]') ||
+      img.closest('[class*="preview"]') ||
+      img.closest('[class*="composer"]') ||
+      img.closest('[id*="upload"]') ||
+      img.closest('[id*="preview"]') ||
+      // Check if image was recently added (likely uploaded)
+      img.dataset.recentlyAdded === "true";
 
     // Must be reasonably sized and likely to contain text
-    const minSize = 150;
+    const minSize = 100; // Reduced from 150 for better coverage
     const hasGoodSize =
-      img.naturalWidth > minSize && img.naturalHeight > minSize;
+      (img.naturalWidth > minSize && img.naturalHeight > minSize) ||
+      (img.width > minSize && img.height > minSize);
 
-    return isUserContent && hasGoodSize;
+    // Additional check: if it's a small image but in an upload context, still analyze
+    const inUploadContext =
+      img.closest('[data-testid*="upload"]') ||
+      img.closest(".file-upload") ||
+      img.closest(".image-upload") ||
+      src.includes("blob:") ||
+      src.includes("data:");
+
+    const shouldAnalyze =
+      (isUserContent && hasGoodSize) ||
+      (inUploadContext && img.naturalWidth > 50);
+
+    if (this.debugMode && shouldAnalyze) {
+      console.log("🖼️ Image will be analyzed:", {
+        src: src.substring(0, 50),
+        isUserContent,
+        hasGoodSize,
+        inUploadContext,
+        dimensions: `${img.naturalWidth || img.width}x${img.naturalHeight || img.height}`,
+      });
+    }
+
+    return shouldAnalyze;
+  }
+
+  monitorFileInputs() {
+    console.log("📁 SafePost AI: Monitoring file inputs for image uploads...");
+
+    // Find all file inputs that accept images
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    let inputCount = 0;
+
+    fileInputs.forEach((input) => {
+      if (!input.dataset.safepostFileAttached) {
+        input.dataset.safepostFileAttached = "true";
+        inputCount++;
+
+        input.addEventListener("change", (event) => {
+          const files = event.target.files;
+          if (files && files.length > 0) {
+            Array.from(files).forEach((file) => {
+              if (file.type.startsWith("image/")) {
+                console.log("📁 SafePost AI: Image file selected:", file.name);
+                this.analyzeUploadedFile(file, input);
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // Also monitor drag and drop areas
+    const dropAreas = document.querySelectorAll(
+      '[data-testid*="upload"], .upload-area, .drop-zone, [class*="drop"]'
+    );
+    dropAreas.forEach((area) => {
+      if (!area.dataset.safepostDropAttached) {
+        area.dataset.safepostDropAttached = "true";
+
+        area.addEventListener("dragover", (e) => {
+          e.preventDefault();
+        });
+
+        area.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const files = e.dataTransfer.files;
+          if (files && files.length > 0) {
+            Array.from(files).forEach((file) => {
+              if (file.type.startsWith("image/")) {
+                console.log("📁 SafePost AI: Image dropped:", file.name);
+                this.analyzeUploadedFile(file, area);
+              }
+            });
+          }
+        });
+      }
+    });
+
+    console.log(
+      `📁 SafePost AI: Monitoring ${inputCount} file inputs and ${dropAreas.length} drop areas`
+    );
+  }
+
+  async analyzeUploadedFile(file, sourceElement) {
+    console.log("📁 SafePost AI: Analyzing uploaded file:", file.name);
+
+    try {
+      // Create temporary image element for analysis
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.dataset.safepostFileUpload = "true";
+      img.dataset.fileName = file.name;
+
+      // Wait for image to load
+      img.onload = () => {
+        console.log("📁 SafePost AI: File loaded, starting OCR analysis...");
+        this.analyzeImage(img);
+
+        // Clean up object URL after analysis
+        setTimeout(() => {
+          URL.revokeObjectURL(img.src);
+        }, 30000);
+      };
+
+      img.onerror = () => {
+        console.error("📁 SafePost AI: Failed to load uploaded image");
+        URL.revokeObjectURL(img.src);
+      };
+    } catch (error) {
+      console.error("📁 SafePost AI: Error analyzing uploaded file:", error);
+    }
   }
 
   async analyzeImage(img) {
@@ -472,7 +758,7 @@ class SensitiveContentDetector {
           text.substring(0, 200)
         );
 
-        const detections = this.analyzeSensitiveText(text);
+        const detections = await this.analyzeSensitiveTextWithAI(text);
 
         if (detections.length > 0) {
           console.log("🚨 SafePost AI: Sensitive data in image!", detections);
@@ -489,6 +775,38 @@ class SensitiveContentDetector {
     }
   }
 
+  async analyzeSensitiveTextWithAI(text) {
+    let detections = [];
+
+    // Use AI-powered analysis if available
+    if (this.aiAnalyzer) {
+      try {
+        const aiDetections = await this.aiAnalyzer.analyzePrivacy(text);
+        if (aiDetections && aiDetections.length > 0) {
+          detections = aiDetections.map((detection) => ({
+            type: detection.type || "pii",
+            label: detection.label || "Privacy Risk",
+            text: detection.text,
+            risk: detection.risk || "medium",
+            source: "ai",
+          }));
+        }
+      } catch (error) {
+        console.warn(
+          "AI analysis failed for image text, falling back to regex:",
+          error
+        );
+      }
+    }
+
+    // If no AI detections or AI unavailable, use regex patterns
+    if (detections.length === 0) {
+      detections = this.analyzeSensitiveText(text);
+    }
+
+    return detections;
+  }
+
   analyzeSensitiveText(text) {
     const patterns = this.getSensitivePatterns();
     const detections = [];
@@ -501,6 +819,7 @@ class SensitiveContentDetector {
           label: config.label,
           text: match[0],
           risk: config.risk,
+          source: "regex",
         });
       });
     });
@@ -703,6 +1022,15 @@ class SensitiveContentDetector {
               }
             });
 
+            // New file inputs
+            const fileInputs = this.findFileInputsInNode(node);
+            fileInputs.forEach((input) => {
+              if (!input.dataset.safepostFileAttached) {
+                this.attachToFileInput(input);
+                foundNewContent = true;
+              }
+            });
+
             // New images
             const images =
               node.matches && node.matches("img")
@@ -765,6 +1093,39 @@ class SensitiveContentDetector {
     }
 
     return inputs;
+  }
+
+  findFileInputsInNode(node) {
+    const inputs = [];
+
+    // Check if node itself is a file input
+    if (node.matches && node.matches('input[type="file"]')) {
+      inputs.push(node);
+    }
+
+    // Check children
+    if (node.querySelectorAll) {
+      inputs.push(...Array.from(node.querySelectorAll('input[type="file"]')));
+    }
+
+    return inputs;
+  }
+
+  attachToFileInput(input) {
+    input.dataset.safepostFileAttached = "true";
+    console.log("📁 SafePost AI: Attached to file input");
+
+    input.addEventListener("change", (event) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        Array.from(files).forEach((file) => {
+          if (file.type.startsWith("image/")) {
+            console.log("📁 SafePost AI: Image file selected:", file.name);
+            this.analyzeUploadedFile(file, input);
+          }
+        });
+      }
+    });
   }
 }
 
