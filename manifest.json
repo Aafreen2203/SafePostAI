@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SafePost AI",
-  "version": "1.0",
-  "description": "AI-powered privacy protection for social media",
+  "version": "2.0",
+  "description": "AI-powered privacy protection for social media uploads",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -10,22 +10,28 @@
     "128": "icons/icon128.png"
   },
   "permissions": ["storage", "activeTab", "scripting"],
-  "host_permissions": ["https://*/*", "http://*/*"],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*",
+    "https://api.openai.com/*",
+    "https://api-inference.huggingface.co/*",
+    "https://api.ocr.space/*"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["api/ai-privacy-analyzer.js", "content.js"],
-      "css": ["styles.css"],
-      "run_at": "document_idle"
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "SafePost AI"
+    "default_title": "SafePost AI - Privacy Protection"
   },
   "web_accessible_resources": [
     {
-      "resources": ["lib/*.js", "api/*.js", "*.css"],
+      "resources": ["*.js", "*.css", "icons/*"],
       "matches": ["<all_urls>"]
     }
   ]
