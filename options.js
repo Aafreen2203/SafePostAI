@@ -14,6 +14,16 @@ class SafePostOptions {
   async loadSettings() {
     try {
       const result = await chrome.storage.local.get();
+      // Set API key fields in UI if present
+      if (document.getElementById("openaiApiKey"))
+        document.getElementById("openaiApiKey").value =
+          result.openaiApiKey || "";
+      if (document.getElementById("huggingfaceApiKey"))
+        document.getElementById("huggingfaceApiKey").value =
+          result.huggingfaceApiKey || "";
+      if (document.getElementById("ocrSpaceApiKey"))
+        document.getElementById("ocrSpaceApiKey").value =
+          result.ocrSpaceApiKey || "";
       this.settings = {
         // Detection thresholds
         piiThreshold: result.piiThreshold || 70,
@@ -95,6 +105,40 @@ class SafePostOptions {
   }
 
   setupEventListeners() {
+    // API key visibility toggles
+    const toggleOpenAI = document.getElementById("toggleOpenAIApiKey");
+    const openaiInput = document.getElementById("openaiApiKey");
+    if (toggleOpenAI && openaiInput) {
+      toggleOpenAI.addEventListener("click", () => {
+        openaiInput.type =
+          openaiInput.type === "password" ? "text" : "password";
+      });
+    }
+    const toggleHF = document.getElementById("toggleHuggingFaceApiKey");
+    const hfInput = document.getElementById("huggingfaceApiKey");
+    if (toggleHF && hfInput) {
+      toggleHF.addEventListener("click", () => {
+        hfInput.type = hfInput.type === "password" ? "text" : "password";
+      });
+    }
+    const toggleOCR = document.getElementById("toggleOcrSpaceApiKey");
+    const ocrInput = document.getElementById("ocrSpaceApiKey");
+    if (toggleOCR && ocrInput) {
+      toggleOCR.addEventListener("click", () => {
+        ocrInput.type = ocrInput.type === "password" ? "text" : "password";
+      });
+    }
+    // Save API keys on Save Settings
+    const saveBtn = document.getElementById("saveSettings");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", async () => {
+        await chrome.storage.local.set({
+          openaiApiKey: openaiInput ? openaiInput.value : "",
+          huggingfaceApiKey: hfInput ? hfInput.value : "",
+          ocrSpaceApiKey: ocrInput ? ocrInput.value : "",
+        });
+      });
+    }
     // Sliders with value display
     this.setupSlider("piiThreshold");
     this.setupSlider("toxicityThreshold");

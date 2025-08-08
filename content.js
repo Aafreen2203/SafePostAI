@@ -1,7 +1,7 @@
 // SafePost AI - Enhanced Content Script v2.0
 console.log("🛡️ SafePost AI v2.0: Starting Enhanced Upload Detection...");
 
-// API Keys
+// API Keys (hardcoded)
 const OCR_SPACE_API_KEY = "K83865885088957";
 const HUGGING_FACE_API_KEY = "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";
 const OPENAI_API_KEY =
@@ -227,23 +227,39 @@ class SafePostAI {
 
   // Main file upload handler
   async handleFileUpload(files, sourceElement) {
+    console.log("[SafePostAI] handleFileUpload called", files);
     const imageFiles = Array.from(files).filter(
       (file) =>
         file.type.startsWith("image/") ||
         /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(file.name)
     );
+    console.log("[SafePostAI] Filtered image files:", imageFiles);
 
-    if (imageFiles.length === 0) return true;
+    if (imageFiles.length === 0) {
+      console.log("[SafePostAI] No image files detected.");
+      return true;
+    }
 
     for (const file of imageFiles) {
       try {
+        console.log(`[SafePostAI] Analyzing file: ${file.name}`);
         const analysis = await this.analyzeImageFile(file);
+        console.log("[SafePostAI] Analysis result:", analysis);
         if (analysis.riskLevel !== "none" && analysis.warnings.length > 0) {
+          console.log("[SafePostAI] Risk detected, showing overlay warning.");
           const shouldContinue = await this.showDetailedWarning(file, analysis);
+          console.log(
+            "[SafePostAI] User decision from overlay:",
+            shouldContinue
+          );
           if (!shouldContinue) {
             this.clearFileInput(sourceElement);
             return false;
           }
+        } else {
+          console.log(
+            "[SafePostAI] No significant risk detected, no overlay shown."
+          );
         }
       } catch (error) {
         console.error("❌ Image analysis failed:", error);
@@ -257,24 +273,39 @@ class SafePostAI {
   // Analyze image file
   async analyzeImageFile(file) {
     try {
-      // Convert file to blob for OCR
+      console.log(`[SafePostAI] Starting OCR for file: ${file.name}`);
       const text = await this.extractTextFromImage(file);
-      console.log("📖 Extracted text:", text.substring(0, 200) + "...");
+      console.log(
+        "[SafePostAI] Extracted text:",
+        text.substring(0, 200) + "..."
+      );
 
-      // Use both AI models for comprehensive analysis
+      console.log("[SafePostAI] Running OpenAI analysis...");
       const openaiAnalysis = await this.analyzeWithOpenAI(text);
+      console.log("[SafePostAI] OpenAI analysis result:", openaiAnalysis);
+
+      console.log("[SafePostAI] Running HuggingFace analysis...");
       const huggingFaceAnalysis = await this.analyzeWithHuggingFace(text);
+      console.log(
+        "[SafePostAI] HuggingFace analysis result:",
+        huggingFaceAnalysis
+      );
+
+      console.log("[SafePostAI] Running regex analysis...");
       const regexAnalysis = this.analyzeWithRegex(text);
+      console.log("[SafePostAI] Regex analysis result:", regexAnalysis);
 
       // Combine results
-      return this.combineAnalyses(
+      const combined = this.combineAnalyses(
         openaiAnalysis,
         huggingFaceAnalysis,
         regexAnalysis,
         text
       );
+      console.log("[SafePostAI] Combined analysis:", combined);
+      return combined;
     } catch (error) {
-      console.error("Analysis error:", error);
+      console.error("[SafePostAI] Analysis error:", error);
       throw error;
     }
   }
@@ -631,6 +662,11 @@ Respond in JSON:
   // Show detailed warning modal as overlay (never navigate away)
   async showDetailedWarning(file, analysis) {
     return new Promise((resolve) => {
+      console.log(
+        "[SafePostAI] Preparing to show overlay modal for",
+        file.name,
+        analysis
+      );
       // Remove any existing modal overlays
       document
         .querySelectorAll(".safepost-modal-overlay")
@@ -650,6 +686,7 @@ Respond in JSON:
         cleanup();
         origResolve(val);
       };
+      console.log("[SafePostAI] Overlay modal shown.");
     });
   }
 

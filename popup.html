@@ -22,31 +22,73 @@
 
       <!-- API Key Setup -->
       <div class="section" id="apiKeySection">
-        <h3>🔑 HuggingFace API Configuration</h3>
+        <h3>🔑 API Key Configuration</h3>
         <div class="input-group">
-          <label for="apiKeyInput">API Key:</label>
+          <label for="openaiApiKeyInput">OpenAI API Key:</label>
           <div class="input-with-button">
             <input
               type="password"
-              id="apiKeyInput"
-              placeholder="Enter your HuggingFace API key"
+              id="openaiApiKeyInput"
+              placeholder="sk-..."
             />
             <button
-              id="toggleApiKey"
+              id="toggleOpenAIApiKey"
               class="toggle-btn"
               title="Show/Hide API Key"
             >
               👁️
             </button>
           </div>
-          <small class="help-text">
-            Get your free API key from
+          <small class="help-text"
+            >Get your API key from
+            <a href="https://platform.openai.com/api-keys" target="_blank"
+              >OpenAI</a
+            ></small
+          >
+        </div>
+        <div class="input-group">
+          <label for="huggingfaceApiKeyInput">Hugging Face API Key:</label>
+          <div class="input-with-button">
+            <input
+              type="password"
+              id="huggingfaceApiKeyInput"
+              placeholder="hf_..."
+            />
+            <button
+              id="toggleHuggingFaceApiKey"
+              class="toggle-btn"
+              title="Show/Hide API Key"
+            >
+              👁️
+            </button>
+          </div>
+          <small class="help-text"
+            >Get your free API key from
             <a href="https://huggingface.co/settings/tokens" target="_blank"
               >HuggingFace</a
-            >
-          </small>
+            ></small
+          >
         </div>
-        <button id="saveApiKey" class="btn btn-primary">Save API Key</button>
+        <div class="input-group">
+          <label for="ocrSpaceApiKeyInput">OCR.space API Key:</label>
+          <div class="input-with-button">
+            <input type="password" id="ocrSpaceApiKeyInput" placeholder="..." />
+            <button
+              id="toggleOcrSpaceApiKey"
+              class="toggle-btn"
+              title="Show/Hide API Key"
+            >
+              👁️
+            </button>
+          </div>
+          <small class="help-text"
+            >Get your free API key from
+            <a href="https://ocr.space/ocrapi" target="_blank"
+              >OCR.space</a
+            ></small
+          >
+        </div>
+        <button id="saveApiKeys" class="btn btn-primary">Save API Keys</button>
       </div>
 
       <!-- Settings -->

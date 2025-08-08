@@ -18,7 +18,9 @@ class SafePostPopup {
   async loadSettings() {
     try {
       const result = await chrome.storage.local.get([
-        "apiKey",
+        "openaiApiKey",
+        "huggingfaceApiKey",
+        "ocrSpaceApiKey",
         "isEnabled",
         "sensitivity",
         "detectPII",
@@ -28,7 +30,9 @@ class SafePostPopup {
       ]);
 
       this.settings = {
-        apiKey: result.apiKey || "",
+        openaiApiKey: result.openaiApiKey || "",
+        huggingfaceApiKey: result.huggingfaceApiKey || "",
+        ocrSpaceApiKey: result.ocrSpaceApiKey || "",
         isEnabled: result.isEnabled !== false,
         sensitivity: result.sensitivity || "medium",
         detectPII: result.detectPII !== false,
@@ -36,25 +40,39 @@ class SafePostPopup {
         detectPolicy: result.detectPolicy !== false,
         detectEntities: result.detectEntities !== false,
       };
-
-      if (this.settings.apiKey) {
-        this.apiService = new HuggingFaceService(this.settings.apiKey);
-      }
     } catch (error) {
       console.error("Error loading settings:", error);
     }
   }
 
   setupEventListeners() {
-    // API Key management
+    // API Key management for all three keys
     document
-      .getElementById("saveApiKey")
-      .addEventListener("click", () => this.saveApiKey());
+      .getElementById("saveApiKeys")
+      .addEventListener("click", () => this.saveApiKeys());
     document
-      .getElementById("toggleApiKey")
-      .addEventListener("click", () => this.toggleApiKeyVisibility());
-    document.getElementById("apiKeyInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.saveApiKey();
+      .getElementById("toggleOpenAIApiKey")
+      .addEventListener("click", () =>
+        this.toggleApiKeyVisibility("openaiApiKeyInput")
+      );
+    document
+      .getElementById("toggleHuggingFaceApiKey")
+      .addEventListener("click", () =>
+        this.toggleApiKeyVisibility("huggingfaceApiKeyInput")
+      );
+    document
+      .getElementById("toggleOcrSpaceApiKey")
+      .addEventListener("click", () =>
+        this.toggleApiKeyVisibility("ocrSpaceApiKeyInput")
+      );
+    [
+      "openaiApiKeyInput",
+      "huggingfaceApiKeyInput",
+      "ocrSpaceApiKeyInput",
+    ].forEach((id) => {
+      document.getElementById(id).addEventListener("keypress", (e) => {
+        if (e.key === "Enter") this.saveApiKeys();
+      });
     });
 
     // Settings
@@ -104,11 +122,13 @@ class SafePostPopup {
   }
 
   updateUI() {
-    // Update API key input
-    const apiKeyInput = document.getElementById("apiKeyInput");
-    if (this.settings.apiKey) {
-      apiKeyInput.value = this.settings.apiKey;
-    }
+    // Update API key inputs
+    const openaiInput = document.getElementById("openaiApiKeyInput");
+    const hfInput = document.getElementById("huggingfaceApiKeyInput");
+    const ocrInput = document.getElementById("ocrSpaceApiKeyInput");
+    if (openaiInput) openaiInput.value = this.settings.openaiApiKey;
+    if (hfInput) hfInput.value = this.settings.huggingfaceApiKey;
+    if (ocrInput) ocrInput.value = this.settings.ocrSpaceApiKey;
 
     // Update status indicator
     this.updateStatusIndicator();
@@ -125,15 +145,19 @@ class SafePostPopup {
     document.getElementById("detectEntities").checked =
       this.settings.detectEntities;
 
-    // Show/hide sections based on API key presence
-    const hasApiKey = !!this.settings.apiKey;
-    document.getElementById("settingsSection").style.display = hasApiKey
+    // Show/hide sections based on API key presence (require at least one key)
+    const hasAnyApiKey = !!(
+      this.settings.openaiApiKey ||
+      this.settings.huggingfaceApiKey ||
+      this.settings.ocrSpaceApiKey
+    );
+    document.getElementById("settingsSection").style.display = hasAnyApiKey
       ? "block"
       : "none";
-    document.getElementById("analyticsSection").style.display = hasApiKey
+    document.getElementById("analyticsSection").style.display = hasAnyApiKey
       ? "block"
       : "none";
-    document.getElementById("logsSection").style.display = hasApiKey
+    document.getElementById("logsSection").style.display = hasAnyApiKey
       ? "block"
       : "none";
   }
@@ -141,8 +165,11 @@ class SafePostPopup {
   updateStatusIndicator() {
     const statusDot = document.getElementById("statusDot");
     const statusText = document.getElementById("statusText");
-
-    if (!this.settings.apiKey) {
+    if (
+      !this.settings.openaiApiKey &&
+      !this.settings.huggingfaceApiKey &&
+      !this.settings.ocrSpaceApiKey
+    ) {
       statusDot.className = "status-dot status-error";
       statusText.textContent = "API Key Required";
     } else if (!this.settings.isEnabled) {
@@ -154,35 +181,33 @@ class SafePostPopup {
     }
   }
 
-  async saveApiKey() {
-    const apiKeyInput = document.getElementById("apiKeyInput");
-    const apiKey = apiKeyInput.value.trim();
-
-    if (!apiKey) {
-      this.showError("Please enter a valid API key");
+  async saveApiKeys() {
+    const openaiInput = document.getElementById("openaiApiKeyInput");
+    const hfInput = document.getElementById("huggingfaceApiKeyInput");
+    const ocrInput = document.getElementById("ocrSpaceApiKeyInput");
+    const openaiApiKey = openaiInput.value.trim();
+    const huggingfaceApiKey = hfInput.value.trim();
+    const ocrSpaceApiKey = ocrInput.value.trim();
+    if (!openaiApiKey && !huggingfaceApiKey && !ocrSpaceApiKey) {
+      this.showError("Please enter at least one API key.");
       return;
     }
+    await chrome.storage.local.set({
+      openaiApiKey,
+      huggingfaceApiKey,
+      ocrSpaceApiKey,
+    });
+    this.settings.openaiApiKey = openaiApiKey;
+    this.settings.huggingfaceApiKey = huggingfaceApiKey;
+    this.settings.ocrSpaceApiKey = ocrSpaceApiKey;
+    this.showSuccess("API keys saved!");
+    this.updateUI();
+  }
 
-    try {
-      // Test the API key
-      const testService = new HuggingFaceService(apiKey);
-      await testService.makeRequest(
-        "dbmdz/bert-large-cased-finetuned-conll03-english",
-        {
-          inputs: "test",
-        }
-      );
-
-      // Save if successful
-      await chrome.storage.local.set({ apiKey: apiKey });
-      this.settings.apiKey = apiKey;
-      this.apiService = testService;
-
-      this.showSuccess("API key saved successfully!");
-      this.updateUI();
-    } catch (error) {
-      console.error("API key validation error:", error);
-      this.showError("Invalid API key. Please check and try again.");
+  toggleApiKeyVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.type = input.type === "password" ? "text" : "password";
     }
   }
 

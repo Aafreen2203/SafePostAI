@@ -19,7 +19,40 @@
       </header>
 
       <main class="options-main">
-        <!-- Detection Settings -->
+        <!-- API Key Settings -->
+        <section class="options-section">
+          <h2>🔑 API Keys</h2>
+          <div class="setting-group">
+            <label for="openaiApiKey">OpenAI API Key:</label>
+            <input
+              type="password"
+              id="openaiApiKey"
+              placeholder="sk-..."
+              autocomplete="off"
+            />
+            <button type="button" id="toggleOpenAIApiKey">👁️</button>
+          </div>
+          <div class="setting-group">
+            <label for="huggingfaceApiKey">Hugging Face API Key:</label>
+            <input
+              type="password"
+              id="huggingfaceApiKey"
+              placeholder="hf_..."
+              autocomplete="off"
+            />
+            <button type="button" id="toggleHuggingFaceApiKey">👁️</button>
+          </div>
+          <div class="setting-group">
+            <label for="ocrSpaceApiKey">OCR.space API Key:</label>
+            <input
+              type="password"
+              id="ocrSpaceApiKey"
+              placeholder="..."
+              autocomplete="off"
+            />
+            <button type="button" id="toggleOcrSpaceApiKey">👁️</button>
+          </div>
+        </section>
         <section class="options-section">
           <h2>🔍 Detection Settings</h2>
 
