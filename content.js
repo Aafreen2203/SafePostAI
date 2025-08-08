@@ -2,10 +2,29 @@
 console.log("🛡️ SafePost AI v2.0: Starting Enhanced Upload Detection...");
 
 // API Keys (hardcoded)
-const OCR_SPACE_API_KEY = "K83865885088957";
-const HUGGING_FACE_API_KEY = "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";
-const OPENAI_API_KEY =
-  "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";
+// API Keys are loaded from chrome.storage.local for security. No hardcoded keys.
+let OCR_SPACE_API_KEY = "";
+let HUGGING_FACE_API_KEY = "";
+let OPENAI_API_KEY = "";
+
+// Load API keys from chrome.storage.local
+async function loadApiKeys() {
+  return new Promise((resolve) => {
+    if (!window.chrome || !chrome.storage || !chrome.storage.local) {
+      resolve();
+      return;
+    }
+    chrome.storage.local.get(
+      ["ocrSpaceApiKey", "huggingfaceApiKey", "openaiApiKey"],
+      (result) => {
+        OCR_SPACE_API_KEY = result.ocrSpaceApiKey || "";
+        HUGGING_FACE_API_KEY = result.huggingfaceApiKey || "";
+        OPENAI_API_KEY = result.openaiApiKey || "";
+        resolve();
+      }
+    );
+  });
+}
 
 // Enhanced warning modal styles
 const WARNING_STYLES = `
@@ -344,6 +363,11 @@ class SafePostAI {
     formData.append("file", file);
     formData.append("language", "eng");
     formData.append("isOverlayRequired", "false");
+    if (!OCR_SPACE_API_KEY) {
+      throw new Error(
+        "OCR.space API key not set. Please configure it in extension options."
+      );
+    }
     formData.append("apikey", OCR_SPACE_API_KEY);
     formData.append("scale", "true");
     formData.append("isTable", "true");
@@ -404,7 +428,9 @@ Respond in JSON:
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            Authorization: OPENAI_API_KEY
+              ? `Bearer ${OPENAI_API_KEY}`
+              : undefined,
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
@@ -444,7 +470,9 @@ Respond in JSON:
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${HUGGING_FACE_API_KEY}`,
+            Authorization: HUGGING_FACE_API_KEY
+              ? `Bearer ${HUGGING_FACE_API_KEY}`
+              : undefined,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -927,14 +955,16 @@ function injectSafePostPrivacyNotice() {
   });
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    injectSafePostPrivacyNotice();
-    new SafePostAI();
-  });
-} else {
+async function startSafePostAI() {
+  await loadApiKeys();
   injectSafePostPrivacyNotice();
   new SafePostAI();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startSafePostAI);
+} else {
+  startSafePostAI();
 }
 
 console.log("🛡️ SafePost AI v2.0: Enhanced upload protection loaded!");
