@@ -266,6 +266,8 @@ class SafePostAI {
     for (const file of imageFiles) {
       try {
         console.log(`[SafePostAI] Analyzing file: ${file.name}`);
+        // Track the file input element globally for modal actions
+        window.lastSafePostUploadElement = sourceElement;
         const analysis = await this.analyzeImageFile(file);
         console.log("[SafePostAI] Analysis result:", analysis);
         if (analysis.riskLevel !== "none" && analysis.warnings.length > 0) {
@@ -277,6 +279,7 @@ class SafePostAI {
           );
           if (!shouldContinue) {
             this.clearFileInput(sourceElement);
+            window.lastSafePostUploadElement = null;
             return false;
           }
         } else {
@@ -284,9 +287,11 @@ class SafePostAI {
             "[SafePostAI] No significant risk detected, no overlay shown."
           );
         }
+        window.lastSafePostUploadElement = null;
       } catch (error) {
         console.error("❌ Image analysis failed:", error);
         // Do not show any error popup or notification; fail silently
+        window.lastSafePostUploadElement = null;
       }
     }
 
@@ -779,6 +784,13 @@ Respond in JSON:
       if (e.target.dataset.action === "cancel") {
         overlay.remove();
         document.body.style.overflow = "";
+        // Remove uploaded photo if possible
+        if (
+          window.lastSafePostUploadElement &&
+          window.lastSafePostUploadElement.type === "file"
+        ) {
+          window.lastSafePostUploadElement.value = "";
+        }
         resolve(false);
       } else if (e.target.dataset.action === "proceed") {
         overlay.remove();
@@ -787,6 +799,13 @@ Respond in JSON:
       } else if (e.target === overlay) {
         overlay.remove();
         document.body.style.overflow = "";
+        // Remove uploaded photo if possible
+        if (
+          window.lastSafePostUploadElement &&
+          window.lastSafePostUploadElement.type === "file"
+        ) {
+          window.lastSafePostUploadElement.value = "";
+        }
         resolve(false);
       }
     });
@@ -832,10 +851,89 @@ Respond in JSON:
   }
 }
 
-// Initialize SafePost AI
+// Automatic Privacy Notice Modal Injection
+function injectSafePostPrivacyNotice() {
+  if (!window.chrome || !chrome.storage || !chrome.storage.local) {
+    // Not running as extension, skip
+    return;
+  }
+  chrome.storage.local.get("SafePostAI_PrivacyNoticeShown", (result) => {
+    if (result.SafePostAI_PrivacyNoticeShown) return;
+
+    // Modal overlay
+    const overlay = document.createElement("div");
+    overlay.style.position = "fixed";
+    overlay.style.top = 0;
+    overlay.style.left = 0;
+    overlay.style.width = "100vw";
+    overlay.style.height = "100vh";
+    overlay.style.background = "rgba(30,30,30,0.45)";
+    overlay.style.backdropFilter = "blur(8px) saturate(1.2)";
+    overlay.style.zIndex = 10000000;
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+
+    // Modal box
+    const modal = document.createElement("div");
+    modal.style.background = "#fff";
+    modal.style.borderRadius = "18px";
+    modal.style.boxShadow =
+      "0 8px 32px rgba(44,62,80,0.18), 0 2px 8px rgba(44,62,80,0.10)";
+    modal.style.maxWidth = "420px";
+    modal.style.padding = "36px 32px 28px 32px";
+    modal.style.textAlign = "center";
+    modal.style.fontFamily = "inherit";
+    modal.style.border = "1.5px solid #dbeafe";
+
+    // Title
+    const title = document.createElement("h2");
+    title.textContent = "SafePost AI Privacy Notice";
+    title.style.marginBottom = "18px";
+    title.style.fontWeight = "700";
+    title.style.fontSize = "1.45rem";
+    title.style.color = "#22223b";
+    modal.appendChild(title);
+
+    // Message
+    const msg = document.createElement("div");
+    msg.style.fontSize = "1.08rem";
+    msg.style.color = "#22223b";
+    msg.style.marginBottom = "22px";
+    msg.innerHTML = `All image analysis and OCR is performed <b>locally in your browser</b>.<br>No images or data are ever uploaded to any server.<br><br>Your privacy is fully protected.`;
+    modal.appendChild(msg);
+
+    // OK button
+    const okBtn = document.createElement("button");
+    okBtn.textContent = "OK";
+    okBtn.style.padding = "12px 36px";
+    okBtn.style.background = "#2563eb";
+    okBtn.style.color = "#fff";
+    okBtn.style.border = "none";
+    okBtn.style.borderRadius = "8px";
+    okBtn.style.fontWeight = "600";
+    okBtn.style.fontSize = "1.08rem";
+    okBtn.style.cursor = "pointer";
+    okBtn.style.boxShadow = "0 1px 4px rgba(44,62,80,0.08)";
+    okBtn.addEventListener("click", () => {
+      chrome.storage.local.set({ SafePostAI_PrivacyNoticeShown: true }, () => {
+        overlay.remove();
+      });
+    });
+    modal.appendChild(okBtn);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  });
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => new SafePostAI());
+  document.addEventListener("DOMContentLoaded", () => {
+    injectSafePostPrivacyNotice();
+    new SafePostAI();
+  });
 } else {
+  injectSafePostPrivacyNotice();
   new SafePostAI();
 }
 
